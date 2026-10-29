@@ -42,8 +42,7 @@ jogo-pedra-papel-tesoura/
 - Node.js e npm.
 - Python e pip.
 - Android Studio e Android SDK.
-- Um dispositivo Android ou emulador Android.
-- Computador e dispositivo Android conectados à mesma rede, quando utilizado um aparelho físico.
+- Um dispositivo Android conectado por USB ou um emulador Android.
 
 ## Como executar a API
 
@@ -69,10 +68,10 @@ pip install -r requirements.txt
 Inicie o servidor:
 
 ```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-A API ficará disponível na porta 8000 do computador.
+A API ficará disponível localmente na porta 8000 do computador.
 
 A documentação interativa pode ser acessada em `/docs`, utilizando o endereço do servidor.
 
@@ -108,21 +107,30 @@ Se necessário, configure o encaminhamento da porta do Metro para o dispositivo 
 adb reverse tcp:8081 tcp:8081
 ```
 
-## Configuração do endereço da API
+Para encaminhar também a API ao dispositivo físico conectado por USB, execute:
 
-O aplicativo utiliza o arquivo `src/config.ts` para configurar o endereço da API.
-
-Para executar em um dispositivo Android físico, configure o endereço IP do computador na rede local, utilizando a porta 8000.
-
-Exemplo de formato:
-
-```text
-http://IP_DO_COMPUTADOR:8000
+```bash
+adb reverse tcp:8000 tcp:8000
 ```
 
-Substitua `IP_DO_COMPUTADOR` pelo endereço local do computador. O celular e o computador precisam estar conectados à mesma rede, e o firewall deve permitir a comunicação pela porta utilizada.
+Mantenha esse encaminhamento ativo enquanto usar o app. Com ele, o endereço
+`127.0.0.1` usado pelo app é encaminhado pelo USB para o computador; não é
+necessário descobrir o IP local nem conectar o celular à mesma rede Wi-Fi.
 
-Não utilize `localhost` no celular para acessar diretamente a API executada no computador, pois esse endereço se refere ao próprio dispositivo móvel.
+## Configuração do endereço da API
+
+O aplicativo utiliza `app/src/config.ts`, configurado para
+`http://127.0.0.1:8000`. Essa configuração funciona em um dispositivo físico
+quando o encaminhamento USB da porta 8000 está ativo.
+
+No emulador Android padrão, o endereço do computador host é diferente. Para
+usar o emulador, altere temporariamente `API_URL` para:
+
+```text
+http://10.0.2.2:8000
+```
+
+Esse endereço especial do emulador encaminha a conexão para o computador host.
 
 ## Endpoints da API
 
@@ -165,6 +173,6 @@ A API rejeita entradas inválidas e campos adicionais não permitidos.
 ## Limitações e observações
 
 - O aplicativo foi desenvolvido e testado em dispositivo Android.
-- Para utilizar um dispositivo físico, é necessário configurar corretamente o endereço da API e permitir a comunicação pela rede local.
+- O acesso HTTP está habilitado para o desenvolvimento local; não use essa configuração como base para uma versão de produção distribuída.
 - A execução depende de a API estar disponível.
 - O ambiente Python utilizado no desenvolvimento é o Python 3.12 disponibilizado pelo sistema operacional.

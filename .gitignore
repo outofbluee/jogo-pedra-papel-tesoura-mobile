@@ -1,1 +1,14 @@
+# Ambiente virtual Python
 api/.venv/
+
+# Dependências do React Native
+app/node_modules/
+
+# Arquivos gerados localmente
+app/android/.gradle/
+app/android/app/build/
+app/android/build/
+app/ios/Pods/
+
+# Logs
+*.log

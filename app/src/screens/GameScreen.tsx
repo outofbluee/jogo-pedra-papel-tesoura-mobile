@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-  ActivityIndicator,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -53,96 +51,99 @@ export default function GameScreen({
   React.useEffect(() => {
     atualizarPlacar();
   }, []);
-  
+
   async function jogar(jogada: Jogada) {
     if (jogando) {
-        return;
+      return;
     }
 
     setJogando(true);
     setMensagem('');
 
     try {
-        const novaRodada = await criarRodada(jogada);
+      const novaRodada = await criarRodada(jogada);
 
-        // A API confirmou a criação da partida.
-        // Guardamos o resultado antes de atualizar o placar.
-        setRodada(novaRodada);
+      // O servidor confirmou a partida e devolveu os dados esperados.
+      setRodada(novaRodada);
 
-        try {
+      try {
         const rodadas = await listarRodadas();
         const novoPlacar = calcularPlacar(rodadas);
 
         setPlacar(novoPlacar);
         setErroPlacar('');
-        } catch (erro) {
+      } catch (erro) {
         setErroPlacar(
-            erro instanceof Error
+          erro instanceof Error
             ? erro.message
             : 'Não foi possível atualizar o placar.',
         );
 
         setMensagem(
-            'Partida registrada, mas não foi possível atualizar o placar. ' +
-            'O resultado da partida foi preservado.',
+          'Partida confirmada, mas não foi possível atualizar o placar. ' +
+            'O resultado foi preservado.',
         );
-        }
+      }
     } catch (erro) {
-        setMensagem(
+      setMensagem(
         erro instanceof Error
-            ? `Não foi possível confirmar a jogada: ${erro.message}`
-            : 'Não foi possível confirmar a jogada.',
-        );
+          ? `${erro.message} Não repita a jogada automaticamente. ` +
+              'Consulte o histórico para verificar se ela foi registrada.'
+          : 'Não foi possível confirmar a jogada. Consulte o histórico antes de jogar novamente.',
+      );
     } finally {
-        setJogando(false);
+      setJogando(false);
     }
-}
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F4F6FA" />
+      <StatusBar barStyle="dark-content" />
 
       <View style={styles.content}>
         <View style={styles.scoreboard}>
-            <Text style={styles.scoreTitle}>Placar</Text>
+          <Text style={styles.scoreTitle}>Placar</Text>
 
-            {carregandoPlacar && placar === null ? (
-                <Text style={styles.scoreMessage}>Carregando placar...</Text>
-            ) : placar === null ? (
-                <Text style={styles.scoreMessage}>
-                Placar indisponível. Verifique sua conexão.
-                </Text>
-            ) : (
-                <View style={styles.scoreRow}>
-                <View style={styles.scoreItem}>
-                    <Text style={styles.scoreNumber}>{placar.vitorias}</Text>
-                    <Text style={styles.scoreLabel}>Vitórias</Text>
-                </View>
+          {carregandoPlacar && placar === null ? (
+            <Text style={styles.scoreMessage}>Carregando placar...</Text>
+          ) : placar === null ? (
+            <Text style={styles.scoreMessage}>
+              Placar indisponível. Verifique sua conexão.
+            </Text>
+          ) : (
+            <View style={styles.scoreRow}>
+              <View style={styles.scoreItem}>
+                <Text style={styles.scoreNumber}>{placar.vitorias}</Text>
+                <Text style={styles.scoreLabel}>Vitórias</Text>
+              </View>
 
-                <View style={styles.scoreItem}>
-                    <Text style={styles.scoreNumber}>{placar.empates}</Text>
-                    <Text style={styles.scoreLabel}>Empates</Text>
-                </View>
+              <View style={styles.scoreItem}>
+                <Text style={styles.scoreNumber}>{placar.empates}</Text>
+                <Text style={styles.scoreLabel}>Empates</Text>
+              </View>
 
-                <View style={styles.scoreItem}>
-                    <Text style={styles.scoreNumber}>{placar.derrotas}</Text>
-                    <Text style={styles.scoreLabel}>Derrotas</Text>
-                </View>
-                </View>
-            )}
-
-            {erroPlacar !== '' && placar !== null && (
-                <Text style={styles.scoreMessage}>
-                Não foi possível atualizar o placar: {erroPlacar}
-                </Text>
-            )}
-
-            {!carregandoPlacar && erroPlacar !== '' && (
-                <TouchableOpacity onPress={atualizarPlacar} accessibilityRole="button">
-                <Text style={styles.scoreRetry}>Atualizar placar</Text>
-                </TouchableOpacity>
-            )}
+              <View style={styles.scoreItem}>
+                <Text style={styles.scoreNumber}>{placar.derrotas}</Text>
+                <Text style={styles.scoreLabel}>Derrotas</Text>
+              </View>
             </View>
+          )}
+
+          {erroPlacar !== '' && placar !== null && (
+            <Text style={styles.scoreMessage}>
+              Não foi possível atualizar o placar: {erroPlacar}
+            </Text>
+          )}
+
+          {!carregandoPlacar && erroPlacar !== '' && (
+            <TouchableOpacity
+              onPress={atualizarPlacar}
+              accessibilityRole="button"
+            >
+              <Text style={styles.scoreRetry}>Atualizar placar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <Text style={styles.title}>Pedra, Papel e Tesoura</Text>
 
         <Text style={styles.subtitle}>

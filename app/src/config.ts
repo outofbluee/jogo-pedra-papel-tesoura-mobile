@@ -1,2 +1,2 @@
-// Endereço da API FastAPI.
-export const API_URL = 'http://192.168.0.107:8000';
+// No Android físico conectado por USB, use `adb reverse tcp:8000 tcp:8000`.
+export const API_URL = 'http://127.0.0.1:8000';
